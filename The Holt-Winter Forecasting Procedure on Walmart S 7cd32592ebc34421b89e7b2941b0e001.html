@@ -1,0 +1,682 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>The Holt-Winter Forecasting Procedure on Walmart Selling Dataset</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	text-indent: -1.7em;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.highlight-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.highlight-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.highlight-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.highlight-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.highlight-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.highlight-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.highlight-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.highlight-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.highlight-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.highlight-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.highlight-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.highlight-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.highlight-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.highlight-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.block-color-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.block-color-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.block-color-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.block-color-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.block-color-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.block-color-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.block-color-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.block-color-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.block-color-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.block-color-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.block-color-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.block-color-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.select-value-color-pink { background-color: rgba(245, 224, 233, 1); }
+.select-value-color-purple { background-color: rgba(232, 222, 238, 1); }
+.select-value-color-green { background-color: rgba(219, 237, 219, 1); }
+.select-value-color-gray { background-color: rgba(227, 226, 224, 1); }
+.select-value-color-opaquegray { background-color: rgba(255, 255, 255, 0.0375); }
+.select-value-color-orange { background-color: rgba(250, 222, 201, 1); }
+.select-value-color-brown { background-color: rgba(238, 224, 218, 1); }
+.select-value-color-red { background-color: rgba(255, 226, 221, 1); }
+.select-value-color-yellow { background-color: rgba(253, 236, 200, 1); }
+.select-value-color-blue { background-color: rgba(211, 229, 239, 1); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="7cd32592-ebc3-4421-b89e-7b2941b0e001" class="page sans"><header><img class="page-cover-image" src="https://s32519.pcdn.co/wp-content/uploads/2017/11/forecast-accuracy-guide-website-header-1536x649.png.webp" style="object-position:center 35.01%"/><div class="page-header-icon page-header-icon-with-cover"><img class="icon" src="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/kisspng-walmart-logo-advertising-coupon-clip-art-walmart-vertical-logo-5a737a8720c0f6.5336254715175174471342.png"/></div><h1 class="page-title">The Holt-Winter Forecasting Procedure on Walmart Selling Dataset</h1></header><div class="page-body"><div id="eb6079ec-2dfb-44bb-8c83-8d6464f00f25" class="column-list"><div id="ceebf8b4-1da0-437a-8997-02ede01a765d" style="width:68.75%" class="column"><p id="72653a80-3f10-4e39-afee-ddd5095ac1c0" class="">
+</p></div><div id="29cfa575-6bac-4590-b047-6d13e149284e" style="width:31.25%" class="column"><figure class="block-color-gray_background callout" style="white-space:pre-wrap;display:flex" id="f8c69241-146a-4250-a222-d9d29748c465"><div style="font-size:1.5em"><img class="icon" src="https://www.notion.so/icons/pencil_blue.svg"/></div><div style="width:100%"><mark class="highlight-blue">Bernardo Puppim</mark></div></figure></div></div><h2 id="a5903fe6-fdd4-4a11-a72d-d13555da967c" class="block-color-blue_background"><mark class="highlight-blue">Abstract</mark></h2><p id="21c0c544-1e63-4d08-a2b6-447d79d5b57a" class="">The Holt-Winters method is a time-series forecasting technique that combines elements of trend decomposition, exponential smoothing, and moving averages. It is used to predict the future behavior of a time series based on historical data, allowing users to make accurate and reliable forecasts across a wide range of applications, including finance, stock management, and production planning. This paper presents a Holt-Winters method applied to Walmart weekly sales forecast, as well as a comparison between the Additional and Multiplicative Seasonal Models in which the multiplicative performed better. A breathily exploratory analysis is performed adding external features such as average temperature and fuel price, showing that some departments have a correlation with those exogenous data.</p><p id="1cf084bd-45f2-42ef-ba87-f253710214d4" class=""><em><strong>keywords: </strong></em><em>HOLT-WINTERS METHOD; TIME-SERIES; FORECASTING; EXPONENTIAL SMOOTHING; PYTHON;  NUMPY;</em></p><h2 id="840cf2e1-f9ea-41ca-a8b6-96f246347436" class="block-color-yellow_background"><mark class="highlight-blue">1. Introduction</mark></h2><p id="cc858a92-6e6c-4843-b793-7093fc10a966" class="">Department stores present areas, called departments, specialized in a product category. In each category, the sales rate behaves in a particular way according to its own seasonality and tend.  The Holt-Winter procedure is a simple exponential smoothing method widely used for forecasting, which can cope with level, trend, and seasonality. Therefore, this method is applied to Walmart Selling Dataset aiming to predict the next nine weeks’ sales. </p><p id="47ce5a2d-72cc-4d13-a0bf-1891d0313a83" class="">To this end, a Holt-Winter model is built from scratch. Along the way, some practical problems are faced e discussed, including methods to find stating values, choice of smoothing parameters, and the choice between multiplicative and additive seasonal models. Also, a comparison between the <em>multiplicative seasonal model </em>and <em>additive seasonal models</em> is performed.</p><h2 id="2b76e7c3-fd7a-4050-b86c-2c817945e5ee" class="block-color-yellow_background"><mark class="highlight-blue">2. Methodology CRISP-DM</mark></h2><blockquote id="04055942-ac0d-4de4-8ddb-35d6346f1938" class="">SHEARER, Colin. 2002</blockquote><div id="1ba3d9df-8ebc-48fb-a36e-b9f833964787" class="column-list"><div id="dfb9a93e-15e2-409b-a7e8-64052f11daf5" style="width:50%" class="column"><p id="c528c2a9-ac4b-4a14-8169-9bd37fff85af" class="">The Cross-Industry Standard Process for Data Mining was first conceived in 1996. It was intended to be an industry-, tool, and application-neutral model.  </p><p id="f2d58777-0b4b-4c78-a504-535111989504" class="">CRISP-DM organizes the data mining process into six phases followed by this project: business understanding, data understanding, data preparation, modeling, evaluation, and deployment.</p><p id="246c8d6b-73b7-4501-b89e-bbb7aec6937e" class="">Phase one, <mark class="highlight-blue"><strong>Business Understanding</strong></mark>, is considered the most important. It focuses on understanding the project objectives from the business perspective, converting this knowledge into a data mining problem definition. </p><p id="ea934b54-2d72-4096-9aa0-a37fdb3c5cb6" class="">The <mark class="highlight-blue"><strong>Data Understanding</strong></mark> phase starts with initial data collection and involves three more steps, including the description of data, exploration of data, and the verification of data quality.</p></div><div id="bc6d6f48-6f82-47dc-b091-b05721f01b85" style="width:50%" class="column"><figure id="95da7a13-103f-4c7d-9700-2fc0653854d2" class="image"><a href="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled.png"><img style="width:664px" src="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled.png"/></a></figure><p id="86b8ff33-44b6-4927-a2da-44e562dd27de" class="">(SHEARER, 2000, p. 5)</p></div></div><p id="a0d45fe6-584d-4dc5-9f19-5dedc6d42187" class="">The <mark class="highlight-blue"><strong>Data Preparation</strong></mark> phase covers all activities to construct the final data set that will be fed into the modeling tool from the initial raw data. Tasks include table, record, and attribute selection, as well as transformation and cleaning of data.</p><p id="2f79a0eb-ac81-45df-a13c-dc3d3c817b22" class="">The fourth phase is <mark class="highlight-blue"><strong>Modeling</strong></mark>. This step includes the selection of the modeling technique, the generation of the test design, the creation of the model, and the assessment of models. </p><p id="e6526fef-a13a-4862-81aa-90c4d6a573d2" class="">Before proceeding to the final deployment of the model built, the results must be <mark class="highlight-blue"><strong>evaluated</strong></mark> based on business success criteria, including a final statement about whether the project already meets the initial business objectives.</p><p id="20585af0-b40d-4f30-a573-73284bb213ff" class="">The <mark class="highlight-blue"><strong>Deployment</strong></mark><strong> </strong>phase can be as simple as generating a report or as complex as implementing a repeatable data mining process.</p><h2 id="d5e5d53b-4109-4082-abd4-0fb5fb266a6a" class="block-color-yellow_background"><mark class="highlight-blue">3. Business Understanding</mark></h2><p id="7fd542c0-f927-495a-9b64-a269e85290e7" class="">One of the leading retail stores in the US, Walmart, would like to predict sales accurately. A sales forecast helps businesses estimate potential future sales. It also allows businesses to anticipate their future needs such as workforce, resources, cash flow, inventory, and investment capital. </p><p id="c53eb583-9479-450b-a74c-9cb88c28dbd8" class="">There are certain events and holidays which impact sales on each day. Walmart runs several promotional markdown events preceding these holidays: the Super Bowl, Labour Day, Thanksgiving, and Christmas. </p><p id="20eabb18-a2c6-42fa-b4d1-bd81647fe50d" class="">In this project, the objective is to forecast the total sales for the next nine weeks. Assuming that the unique information available is the sales time series from the last three years. </p><h2 id="8290c943-8d79-4430-b153-bd754d045279" class="block-color-yellow_background"><mark class="highlight-blue">4. Data Understanding</mark></h2><p id="8913bcc4-5d03-4464-8624-3f840ce5565d" class="">The data were collected from a Kaggle Dataset in the public domain. It provides historical sales data for 45 Walmart stores located in different regions, and each store contains a number of departments.</p><p id="f6c1599d-c7f4-4d3b-9780-d475c923a523" class="">Additionally, the dataset presents the average temperature in the region, the cost of fuel over time, and the unemployment rate.</p><h3 id="775f7687-c39e-4556-bfb9-25f8360eda5d" class="block-color-blue"><mark class="highlight-blue">4.1. Exploratory Data Analysis</mark></h3><p id="c645a2ec-7d0b-49b1-9c34-084b51ff7d6f" class="">In order to perform the EDA, the tree tables available in the database are joined into a unique data frame. Thereby, the pieces of information can be compared easier.</p><p id="764c09ce-18d1-42d4-9213-5e0f0b27e998" class="">With a view to guiding the exploration, some statements are created to be validated or refused. Those conjectures are based on exogenous data, such as average temperature, fuel cost, and unemployment rate.</p><p id="4a908c7e-5405-44b0-b7c5-57b15dcea3f3" class=""><mark class="highlight-yellow"><strong>Statement 1:</strong></mark>
+Some departments are strongly correlated with temperature fluctuation, while others are independent.</p><p id="fea0fe55-f383-4408-8a4d-da59406cb21c" class="">To compare temperature fluctuation with weekly sales the data were rescaled between 0 and 1.</p><div id="669a5906-9c14-4124-a892-cabc1144f286" class="column-list"><div id="f005f63d-1c4b-469e-8e65-fe7a615fa4ef" style="width:50%" class="column"><p id="819809ed-213c-4a6b-8221-6aadbe86b791" class=""><mark class="highlight-yellow">Apparently correlated</mark></p><figure id="1851331f-cd3b-4030-a804-efb06a7750fc" class="image"><a href="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%201.png"><img style="width:831px" src="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%201.png"/></a></figure></div><div id="67edd997-575a-49a9-a636-c520a946a120" style="width:50%" class="column"><p id="b3b79542-5617-4ae3-bd61-96e09b7abdfd" class=""><mark class="highlight-yellow">No apparent correlation</mark></p><figure id="173d7b0c-d1d1-4940-b851-c51376823bae" class="image"><a href="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%202.png"><img style="width:828px" src="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%202.png"/></a></figure></div></div><p id="3ec7c1f8-2cfc-4d1a-b8b8-1e6d25c947f3" class="">Above are two charts plotting three departments and the temperature fluctuation in light grey. On left, as an example, the <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mi>e</mi><mi>p</mi><mi>t</mi><mo>=</mo><mo stretchy="false">[</mo><mn>12</mn><mo separator="true">,</mo><mn>28</mn><mo separator="true">,</mo><mn>9</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">Dept = [12, 28, 9]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8777699999999999em;vertical-align:-0.19444em;"></span><span class="mord mathnormal">De</span><span class="mord mathnormal">pt</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">12</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">28</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">9</span><span class="mclose">]</span></span></span></span></span><span>﻿</span></span> presents a seasonality similar to the average temperature. On right, <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mi>e</mi><mi>p</mi><mi>t</mi><mo>=</mo><mo stretchy="false">[</mo><mn>32</mn><mo separator="true">,</mo><mn>54</mn><mo separator="true">,</mo><mn>60</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">Dept = [32,54,60]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8777699999999999em;vertical-align:-0.19444em;"></span><span class="mord mathnormal">De</span><span class="mord mathnormal">pt</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">32</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">54</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">60</span><span class="mclose">]</span></span></span></span></span><span>﻿</span></span> does not seem to have a correlation with temperature.</p><p id="8ff71885-35c8-4700-af74-4d2c2430d3aa" class=""><mark class="highlight-yellow"><strong>Statement 2:</strong></mark>
+Some departments are strongly correlated with fuel cost, while others are independent.</p><div id="ae23b8b4-6ca7-440a-a3b9-6cee13b948f9" class="column-list"><div id="c4de9f77-5945-4db9-b161-8f5ca8a64572" style="width:50%" class="column"><p id="9fdbc6ad-dc23-4bf0-aacb-1260e91a876b" class=""><mark class="highlight-yellow">Apparently correlated</mark></p><figure id="0ab9e743-00ba-436b-a4b0-aad7f9163c22" class="image"><a href="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%203.png"><img style="width:826px" src="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%203.png"/></a></figure></div><div id="4ead5dee-b1c3-43b9-a662-9957c1950927" style="width:50%" class="column"><p id="16a5be1b-4911-40cd-ac83-e5245e9ad1fa" class=""><mark class="highlight-yellow">No apparent correlation</mark></p><figure id="75d0baee-9db4-44f0-b6d2-82cd347eff15" class="image"><a href="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%204.png"><img style="width:825px" src="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%204.png"/></a></figure></div></div><p id="32ac5fab-9493-432d-8208-16e1abbae233" class="">Again, there are two charts but this time the fuel cost is plotted in light grey. On left, as an example, the <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mi>e</mi><mi>p</mi><mi>t</mi><mo>=</mo><mo stretchy="false">[</mo><mn>49</mn><mo separator="true">,</mo><mn>54</mn><mo separator="true">,</mo><mn>87</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">Dept = [49, 54, 87]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8777699999999999em;vertical-align:-0.19444em;"></span><span class="mord mathnormal">De</span><span class="mord mathnormal">pt</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">49</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">54</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">87</span><span class="mclose">]</span></span></span></span></span><span>﻿</span></span> presents an apparent correlation. On right, <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mi>e</mi><mi>p</mi><mi>t</mi><mo>=</mo><mo stretchy="false">[</mo><mn>3</mn><mo separator="true">,</mo><mn>40</mn><mo separator="true">,</mo><mn>77</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">Dept = [3,40,77]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8777699999999999em;vertical-align:-0.19444em;"></span><span class="mord mathnormal">De</span><span class="mord mathnormal">pt</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">3</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">40</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">77</span><span class="mclose">]</span></span></span></span></span><span>﻿</span></span> does not seem to have any correlation with fuel cost.</p><p id="69b06384-2794-4d43-8bc0-64688b128aca" class=""><mark class="highlight-yellow"><strong>Pearson Correlation</strong></mark></p><p id="6959f73b-245b-4270-8f61-0c36a1d31752" class="">The visual representation of all 81 departments creates noise and a loss of peace of information. That is why only three departments were picked to be plotted. However, understanding each department&#x27;s behavior can be a business advantage. So, the <em>heatmap</em> representation of correlation is created.</p><figure id="9de08031-a8b0-4fbb-aaff-3efb1e371d46" class="image"><a href="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%205.png"><img style="width:1046px" src="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%205.png"/></a></figure><figure id="057bf13b-6bb5-4309-82a7-f03c3bff2a9d" class="image"><a href="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%206.png"><img style="width:1044px" src="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%206.png"/></a></figure><p id="1dee8d4d-07a8-4f63-9ce3-4b213990da33" class="">As long as the real meaning of each department is unknown further insights into possible effects and causality is not possible. But, it is possible to ensure that some departments have some correlation with temperature and fuel price, besides not being strong if adopting a threshold of 0.75.</p><p id="d3999a47-a545-4def-9ac0-85bb99a2aa25" class=""><mark class="highlight-yellow"><strong>Statement 3:</strong></mark>
+Promotional markdown events (precede prominent holidays) have a strong impact on weekly sales.</p><div id="3c543167-9a02-4f5e-860a-c4bcbac04688" class="column-list"><div id="260fe075-0fae-4b4d-b6eb-927590c473b2" style="width:50%" class="column"><p id="848619b1-47e0-4066-9acd-09e379b40645" class="">This time, I decided to plot all departments’ historical simultaneously on the same chart. I expected that by overlapping those lines a pattern of sales shows up. In addition, a dotted line represents the sum of all departments’ sales, and the blue ones demarcate the holiday weeks.</p><p id="c592e490-4c2e-4e20-9de1-555f4470aa80" class="">All piece of data is normalized in terms of their maximum and minimum values. So, the y-axis stays in a range between 0 and 1. The blue line represents the Super Bowl, Labour Day, Thanksgiving, and Christmas dates respectively.</p><p id="5a1da159-c8c5-4603-b996-f635926a7673" class="">As expected, it’s possible to notice a significant increase in sales in the weeks that precedes all holidays besides Labour Day. </p></div><div id="a2c766fa-8416-4a7d-aed0-a7d314249284" style="width:50%" class="column"><figure id="f4634b77-7630-4988-88b5-2189a7c02028" class="image"><a href="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%207.png"><img style="width:810px" src="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%207.png"/></a></figure></div></div><p id="6091bff5-1c08-4667-9ef2-a42389c5e712" class=""><mark class="highlight-yellow"><strong>Statement 4:</strong></mark>
+Weekly sales and the Unemployment rate have an inverse correlation.</p><div id="cdc36acd-4d57-43ef-be5c-59631f06c90a" class="column-list"><div id="9752e44a-b00b-4101-90bc-08c369355756" style="width:56.25%" class="column"><figure id="a1af1928-bfd9-4cec-b90b-425bf30f45bf" class="image"><a href="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%208.png"><img style="width:800px" src="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%208.png"/></a></figure></div><div id="a9fa5c74-866a-4594-a567-7a10c60218d1" style="width:43.75%" class="column"><figure id="122ccde5-6518-4a39-b42b-3fe2bff55136" class="image"><a href="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%209.png"><img style="width:683px" src="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%209.png"/></a></figure></div></div><p id="a92b7a26-d9f7-412d-94c8-aad335e1aa1b" class="">Very feel departments presented the correlation expected. When compared with the total sales this correlation vanished. </p><h2 id="2f337368-c2cb-4526-92a0-c4b70e29064c" class="block-color-yellow_background"><mark class="highlight-blue">5. Data Preparation</mark></h2><p id="ba2fd558-f6ee-43b3-b95b-d5c37dc98bbf" class="">This procedure is a univariate or projection method, in which the forecast is based only on the sales time-series historical. Thus, the data preparation consists of removing from the data all features, keeping only the target variable.</p><pre id="23d0d092-3166-4217-bccc-8cc7a9318977" class="code"><code>df1 = df_raw.groupby([&#x27;Date&#x27;]).Weekly_Sales.sum().reset_index()
+df1[&#x27;Date&#x27;] = pd.to_datetime(df1[&#x27;Date&#x27;])
+df1 = df1.set_index(&#x27;Date&#x27;)</code></pre><ol type="1" id="089e2560-82b8-4322-8a6f-9f2b3c3b46d5" class="numbered-list" start="1"><li>Reduce the Weekly Sales data by grouping them by date and summing the Weekly Sales for each department.</li></ol><ol type="1" id="e2edc50b-0337-49e8-ad84-708d79c1d841" class="numbered-list" start="2"><li>Transform the feature ‘Date’ into D<em>ateTime</em> type.</li></ol><ol type="1" id="a629b526-59da-41ca-a273-5b8551a65d37" class="numbered-list" start="3"><li>Set the column ‘Date’ as the index.</li></ol><h2 id="c11c7c03-e00d-4ecb-9bd6-22c2d79ad4f0" class="block-color-yellow_background"><mark class="highlight-blue">6. HoltWinter Model</mark></h2><h3 id="22352f6a-1481-4cdd-9e73-576cb6175d63" class=""><mark class="highlight-blue">6.1 Data Split</mark></h3><div id="90e0009b-9894-414d-9587-ef63069a6c91" class="column-list"><div id="c4d5ee8f-9f5b-4cc8-843d-ea01b42b5fa0" style="width:50%" class="column"><p id="3f1b899f-59aa-4fd9-867a-a4bcae4e0e69" class="">After the preparation phase, the data ends up with 143 rows. That represents the number of weeks available to perform the model train and test.</p><p id="8731d163-456c-430f-94e2-3958b7b4652c" class="">The Holt-Winter procedure demands the following data segmentations:</p><ul id="3d6293d5-240e-4e17-a76d-740d1cb1ea48" class="bulleted-list"><li style="list-style-type:disc">At least two seasons to calculate the centered moving mean. The interval between weeks 0 and 103.</li></ul><p id="2cbcde02-3e72-402e-8c98-4bc45af07fa6" class="">In the centered moving mean calculation, half of the first season, and half of the last one are lost. The first interval is represented with the red area, the last half will be reutilized to train the model.</p></div><div id="0b2d970e-dfdd-42ea-82cc-fc9b84874818" style="width:50%" class="column"><figure id="bd507092-03a1-44aa-8137-a76190fa09c6" class="image"><a href="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%2010.png"><img style="width:837px" src="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%2010.png"/></a></figure></div></div><ul id="cd43ee33-e310-415c-9d7d-b6084dfad47a" class="bulleted-list"><li style="list-style-type:disc">The initial seasonal index is defined for the 52 weeks of the year.</li></ul><ul id="100c51f3-ee56-43c1-a733-a42b97702bd0" class="bulleted-list"><li style="list-style-type:disc">The remaining data, the weeks 79 until 143 are used at the expanding window train and validation. Note that at the gap [90:104] the shadows from the moving mean calculation and from the expanding window overlap, indicating that the data belongs to both phases.</li></ul><h3 id="f9724db5-6af2-4151-81c8-0d96f9f1c1ae" class=""><mark class="highlight-blue">6.2. Initial values of model parameters</mark></h3><p id="8966c1fc-c9c7-4a22-9fe9-0be8099e9a3e" class=""><mark class="highlight-blue">6.2.1. Seasonal Indice</mark></p><p id="6f6992b5-b17b-41ea-9730-8389624a6a5e" class="">The initial seasonal indices can be computed by comparing the appropriate observation in the first year with <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><msub><mi>X</mi><mn>1</mn></msub><mo>ˉ</mo></mover></mrow><annotation encoding="application/x-tex">\bar{X_1}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9701099999999999em;vertical-align:-0.15em;"></span><span class="mord accent"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8201099999999999em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07847em;">X</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.07847em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span><span style="top:-3.25233em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord">ˉ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span><span>﻿</span></span>. In the aditive seasonal model, the equation used is <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>F</mi><mn>0</mn></msub><mo>=</mo><mo stretchy="false">(</mo><msub><mi>x</mi><mi>m</mi></msub><mo>−</mo><mover accent="true"><msub><mi>X</mi><mn>1</mn></msub><mo>ˉ</mo></mover><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">F_0 = (x_m - \bar{X_1}  )</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">F</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">m</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1.07011em;vertical-align:-0.25em;"></span><span class="mord accent"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8201099999999999em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07847em;">X</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.07847em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span><span style="top:-3.25233em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord">ˉ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span><span class="mclose">)</span></span></span></span></span><span>﻿</span></span>, and <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>F</mi><mn>0</mn></msub><mo>=</mo><msub><mi>x</mi><mi>m</mi></msub><mi mathvariant="normal">/</mi><mover accent="true"><msub><mi>X</mi><mn>1</mn></msub><mo>ˉ</mo></mover></mrow><annotation encoding="application/x-tex"> F_0 = x_m / \bar{X_1}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">F</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.07011em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">m</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">/</span><span class="mord accent"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8201099999999999em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07847em;">X</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.07847em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span><span style="top:-3.25233em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord">ˉ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span><span>﻿</span></span> in the multiplicative seasonal model (Granger &amp; Newbold,1986, Chapter 5). Instead of using a unique mean value of X for the first year, a centered moving mean is calculated to replace that reference value.</p><div id="2a9300e8-de7f-443a-ad4b-fea4bdc52cc8" class="column-list"><div id="5e6e53db-231b-4a53-bf3a-51fd8204eaf8" style="width:50%" class="column"><p id="bbfc3b9f-36de-46e3-96c5-6a85bd926eba" class=""><mark class="highlight-blue">Centered Moving Mean</mark></p><p id="c2483dbc-2945-454a-9490-21c9d9952c6d" class="">The CMM is calculated using the mean of the <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi></mrow><annotation encoding="application/x-tex">m</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathnormal">m</span></span></span></span></span><span>﻿</span></span>  surrounding values at the position <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi></mrow><annotation encoding="application/x-tex">t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.61508em;vertical-align:0em;"></span><span class="mord mathnormal">t</span></span></span></span></span><span>﻿</span></span>. Where <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi></mrow><annotation encoding="application/x-tex">m</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathnormal">m</span></span></span></span></span><span>﻿</span></span> is the season length and <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi></mrow><annotation encoding="application/x-tex">t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.61508em;vertical-align:0em;"></span><span class="mord mathnormal">t</span></span></span></span></span><span>﻿</span></span> is the position that is calculated. As long as a year has 52 weeks, in order to estimate 52 means, it is necessary to use 104 weeks peace of information from the time series.</p><p id="afbe63ff-4f98-420c-992d-5ff0ef3b8a51" class="">Winters (1960) originally recommended that the seasonal factor should be normalized at the start of the series but not thereafter so that they would soon “contain some of the trend effects”. Roberts (1982) states that later authors suggested that they should be normalized once a year or even at every observation in order to be &quot;consistent with any reasonable definition of seasonality” ( 1988, p.133, apud Chatfield &amp; Mohammad).</p></div><div id="489c66c8-f46c-4c2b-beeb-5135d566509c" style="width:50%" class="column"><figure id="fe90ff23-9db2-47c2-b0f7-5047019a7212" class="image"><a href="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%2011.png"><img style="width:785px" src="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%2011.png"/></a></figure></div></div><p id="93dc9c64-01fd-4340-9952-349e9eb38b37" class="">In this project, the normalization is performed only at the beginning. Considering that the training data and the prediction horizon are short, the constant normalization would not make a relevant impact on the results.</p><p id="d1c9a0d9-49b1-45ee-ad82-afb1d9622696" class=""><mark class="highlight-blue">6.2.2. Level and Trend</mark></p><p id="a941a4ec-6c04-460e-927e-0582bf921c12" class="">To estimate initial values for level and trend a linear regression on time is fitted to all the (deseasonalized) data to get starting values. So, before calculating those parameters subtract or divide the time series by the seasonal indices to remove the seasonality from the data.</p><div id="4bcd40a7-976c-431b-a53f-6d717de2a4a8" class="column-list"><div id="688509e9-e0b9-48d5-8f67-ae3bbf2059ce" style="width:43.75%" class="column"><p id="56780e05-821c-4bc0-aa3b-6d7969e94f3d" class=""><mark class="highlight-yellow">Initial Trend</mark></p><figure id="d4ac62db-40a7-46c6-a67a-9f8a031a678e" class="equation"><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><div class="equation-container"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>b</mi><mn>0</mn></msub><mo>=</mo><mfrac><mrow><mo>∑</mo><mrow><mo stretchy="false">(</mo><mi>x</mi><mo>−</mo><mover accent="true"><mi>x</mi><mo>ˉ</mo></mover></mrow><mo stretchy="false">)</mo><mo>∗</mo><mo stretchy="false">(</mo><mi>y</mi><mo>−</mo><mover accent="true"><mi>y</mi><mo>ˉ</mo></mover><mo stretchy="false">)</mo></mrow><mrow><mo>∑</mo><mrow><mo stretchy="false">(</mo><mi>x</mi><mo>−</mo><msup><mover accent="true"><mi>x</mi><mo>ˉ</mo></mover><mn>2</mn></msup></mrow><mo stretchy="false">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">b_0=\frac{\sum{(x - \bar{x}})*(y -\bar{y} )}{\sum{(x - \bar{x}^2})}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.84444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">b</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.36301em;vertical-align:-0.93601em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.427em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mop op-symbol small-op" style="position:relative;top:-0.0000050000000000050004em;">∑</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord"><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.56778em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">x</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.22222em;"><span class="mord">ˉ</span></span></span></span></span></span></span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.740108em;"><span style="top:-2.9890000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mop op-symbol small-op" style="position:relative;top:-0.0000050000000000050004em;">∑</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.56778em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">x</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.22222em;"><span class="mord">ˉ</span></span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord accent"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.56778em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.19444em;"><span class="mord">ˉ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.19444em;"><span></span></span></span></span></span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.93601em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></div></figure><p id="d1500c8a-949f-4fda-b9c8-9dcd06f77b08" class=""><mark class="highlight-yellow">Initial Level</mark></p><figure id="829eb074-f25c-4efa-a53b-2290f6fa3cef" class="equation"><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><div class="equation-container"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>a</mi><mn>0</mn></msub><mo>=</mo><mover accent="true"><mi>y</mi><mo>ˉ</mo></mover><mo>−</mo><msub><mi>b</mi><mn>0</mn></msub><mo>∗</mo><mover accent="true"><mi>x</mi><mo>ˉ</mo></mover></mrow><annotation encoding="application/x-tex">a_0= \bar{y} -b_0*\bar{x}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.7777700000000001em;vertical-align:-0.19444em;"></span><span class="mord accent"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.56778em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.19444em;"><span class="mord">ˉ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.19444em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.84444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">b</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.56778em;vertical-align:0em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.56778em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">x</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.22222em;"><span class="mord">ˉ</span></span></span></span></span></span></span></span></span></span></span></div></figure></div><div id="86df2cd3-5515-4b52-a67e-74c0c762f1dc" style="width:56.25%" class="column"><figure id="916d52d3-927d-4c7c-ab4c-08134a8a7c89" class="image"><a href="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%2012.png"><img style="width:793px" src="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%2012.png"/></a></figure></div></div><h3 id="70719f0f-69bd-4728-8dfd-22758c5fde9b" class=""><mark class="highlight-blue">6.3. Training Model</mark></h3><p id="ae2faa4b-a0ad-4346-9367-f89395bf3d56" class=""><mark class="highlight-yellow">The Holt Winters’ Equations </mark>are applied to the initial parameters of level, trend, and seasonal index to rebuild the time series. </p><p id="4b103b86-2a21-4a47-9ea5-970400c07592" class=""><mark class="highlight-yellow">Level:</mark></p><figure id="bf4badbf-f1c7-4ce6-86ee-c950c553c61e" class="equation"><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><div class="equation-container"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>a</mi><mi>t</mi></msub><mo>=</mo><mi>α</mi><mfrac><msub><mi>x</mi><mi>t</mi></msub><msub><mi>b</mi><mrow><mi>t</mi><mo>−</mo><mi>τ</mi></mrow></msub></mfrac><mo>+</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>α</mi><mo stretchy="false">)</mo><mo stretchy="false">(</mo><msub><mi>a</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><msub><mi>F</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">a_t = \alpha \frac{x_t}{b_{t-\tau}} + (1-\alpha)(a_{t-1}+F_{t-1})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2805559999999999em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.0018909999999996em;vertical-align:-0.894331em;"></span><span class="mord mathnormal" style="margin-right:0.0037em;">α</span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.1075599999999999em;"><span style="top:-2.3139999999999996em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal">b</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.28055599999999997em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mbin mtight">−</span><span class="mord mathnormal mtight" style="margin-right:0.1132em;">τ</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.208331em;"><span></span></span></span></span></span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2805559999999999em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.894331em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0037em;">α</span><span class="mclose">)</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.301108em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.208331em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">F</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.301108em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.208331em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></span></div></figure><p id="8654290e-6ad9-42a5-9f69-c3bf00c822db" class=""><mark class="highlight-yellow">Trend:</mark></p><figure id="2aeff10d-9a52-43a5-9cca-5fd8432c5839" class="equation"><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><div class="equation-container"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>b</mi><mi>t</mi></msub><mo>=</mo><mi>β</mi><mfrac><msub><mi>x</mi><mi>t</mi></msub><msub><mi>a</mi><mi>t</mi></msub></mfrac><mo>+</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>β</mi><mo stretchy="false">)</mo><msub><mi>b</mi><mrow><mi>t</mi><mo>−</mo><mi>τ</mi></mrow></msub></mrow><annotation encoding="application/x-tex">b_t = \beta\frac{x_t}{a_t}+(1-\beta)b_{t-\tau}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.84444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">b</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2805559999999999em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.94356em;vertical-align:-0.8360000000000001em;"></span><span class="mord mathnormal" style="margin-right:0.05278em;">β</span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.1075599999999999em;"><span style="top:-2.3139999999999996em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2805559999999999em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2805559999999999em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.8360000000000001em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.05278em;">β</span><span class="mclose">)</span><span class="mord"><span class="mord mathnormal">b</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.28055599999999997em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mbin mtight">−</span><span class="mord mathnormal mtight" style="margin-right:0.1132em;">τ</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.208331em;"><span></span></span></span></span></span></span></span></span></span></span></div></figure><p id="9da0abdd-9962-438c-9d50-7127a5d08055" class=""><mark class="highlight-yellow">Seasonal Index:</mark></p><figure id="03b411d0-10aa-4181-a726-9c4d52986979" class="equation"><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><div class="equation-container"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>F</mi><mi>t</mi></msub><mo>=</mo><mi>γ</mi><mo stretchy="false">(</mo><msub><mi>a</mi><mi>t</mi></msub><mo>−</mo><msub><mi>a</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo stretchy="false">)</mo><mo>+</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>γ</mi><mo stretchy="false">)</mo><msub><mi>F</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub></mrow><annotation encoding="application/x-tex">F_t=\gamma(a_t-a_{t-1})+(1-\gamma)F_{t-1}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">F</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2805559999999999em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2805559999999999em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.301108em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.208331em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span><span class="mclose">)</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">F</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.301108em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.208331em;"><span></span></span></span></span></span></span></span></span></span></span></div></figure><div id="da952f49-a077-48a7-bc07-1fb24d061ae2" class="column-list"><div id="67cbea32-e117-4c58-8f2e-3d81d3e00bbe" style="width:50%" class="column"><p id="457e116b-a2b3-4047-81d1-eaa49516c100" class=""><mark class="highlight-yellow"> Multiplicative Seasonal Model:</mark></p></div><div id="e4db4258-75d3-4a56-8146-d3de9bec2a21" style="width:50%" class="column"><p id="03efd830-e2a4-4834-ad51-4618ce327f17" class=""><mark class="highlight-yellow">Additive Seasonal Model:</mark></p></div></div><div id="62bcbf82-46de-437e-8d8b-3f5e158e5eab" class="column-list"><div id="610d81ad-73d5-4fd2-bd3d-501855c4ab3d" style="width:50%" class="column"><figure id="ba171915-5c8f-4e28-8237-713f7ac1cdc2" class="equation"><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><div class="equation-container"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>y</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>=</mo><mo stretchy="false">(</mo><msub><mi>a</mi><mn>1</mn></msub><mo>+</mo><msub><mi>b</mi><mn>1</mn></msub><mi>t</mi><mo stretchy="false">)</mo><msub><mi>F</mi><mrow><mi>t</mi><mo>−</mo><mi>m</mi></mrow></msub><mo>+</mo><msub><mi>ε</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex"> y_{t+1} =(a_1 +b_1t)F_{t-m} +ε_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.638891em;vertical-align:-0.208331em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.301108em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.208331em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">b</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord mathnormal">t</span><span class="mclose">)</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">F</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.28055599999999997em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mbin mtight">−</span><span class="mord mathnormal mtight">m</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.208331em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">ε</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2805559999999999em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span></div></figure></div><div id="ce99ab2f-aebc-43de-ac57-17c2149f53f5" style="width:50%" class="column"><figure id="6357634b-3735-445b-8ad1-4861ae223eec" class="equation"><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><div class="equation-container"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>y</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>=</mo><msub><mi>a</mi><mn>1</mn></msub><mo>+</mo><msub><mi>b</mi><mn>1</mn></msub><mi>t</mi><mo>+</mo><msub><mi>F</mi><mrow><mi>t</mi><mo>−</mo><mi>m</mi></mrow></msub><mo>+</mo><msub><mi>ε</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex"> y_{t+1} =a_1 +b_1t + F_{t-m} +ε_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.638891em;vertical-align:-0.208331em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.301108em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.208331em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.73333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.84444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">b</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord mathnormal">t</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.891661em;vertical-align:-0.208331em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">F</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.28055599999999997em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mbin mtight">−</span><span class="mord mathnormal mtight">m</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.208331em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">ε</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2805559999999999em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span></div></figure></div></div><p id="463fbdd6-774d-42fc-8a96-1b77c449f7e7" class=""><mark class="highlight-blue">6.3.1. Smoothing Constant</mark></p><div id="c02f0a60-610a-4cc2-a124-cfeb6880e2cc" class="column-list"><div id="d806a53b-dc0d-4a0b-9fe3-8ecd9909d64f" style="width:50%" class="column"><p id="90918e1b-03ea-4ce0-87b5-5f31b72c0292" class="">To define the smoothing constants of the model a <em>root mean squared error</em> metric is adopted as an objective function, in which its’ value needs to be minimized. The optimization aspect of it is handled by a <em><mark class="highlight-yellow">scipy</mark></em> library minimize function.</p><pre id="d21cb4ec-3fb7-4929-aa6b-6d0229c9570a" class="code"><code>HW_mul_model.get_param()
+return = (0.0219, 0.868, 0.01)</code></pre></div><div id="f1e08e2a-5456-4cb7-ace7-71ad7cfe52b3" style="width:50%" class="column"><figure id="6d3bf9b3-bc21-4eeb-b3ec-038e145fd30b" class="image"><a href="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%2013.png"><img style="width:1077px" src="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%2013.png"/></a></figure><figure class="block-color-yellow_background callout" style="white-space:pre-wrap;display:flex" id="6116daea-aec9-4da8-8cae-7814ab08883e"><div style="font-size:1.5em"><img class="icon" src="https://www.notion.so/icons/blood-pressure_blue.svg"/></div><div style="width:100%"><mark class="highlight-blue">RMSE : 2.240.390,28
+MAPE : 0,0431</mark></div></figure></div></div><p id="2cae3ecf-3cc2-4732-94e0-a1f21dbf92b9" class=""><mark class="highlight-yellow">Fitted Curve of Multiplicative Seasonal Model:</mark></p><figure id="96f38170-ba03-4db1-ae9b-5815ea9c58d9" class="image"><a href="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%2014.png"><img style="width:761px" src="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%2014.png"/></a></figure><h3 id="6c668a16-88bb-4d9f-a0bd-f9217a846e8f" class=""><mark class="highlight-blue">6.4. Expending Window</mark></h3><div id="37444c6e-3e88-4141-a8d2-b5958829c47d" class="column-list"><div id="f4d97e5a-4d35-47af-9f9d-55c20aa673d1" style="width:37.5%" class="column"><p id="4b0805c9-aa05-46d4-b0b2-21618ca1fa66" class=""><mark class="highlight-blue"> </mark>To cross-validate the model it is used the expanding window procedure along the data section specified in item 6.1. It is defined as a 9 weeks forecast horizon for testing, and a total of 31 splits for training.</p></div><div id="b9d10cbf-b09a-43f6-a1e1-1ee4ad2fd073" style="width:62.5%" class="column"><figure id="9a29167c-b3bc-4589-97f0-fbb8c4e4f7de" class="image"><a href="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%2015.png"><img style="width:850px" src="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%2015.png"/></a></figure></div></div><h2 id="fceb9e3c-54e0-45d4-8232-905af51557f4" class="block-color-yellow_background"><mark class="highlight-blue">7. Evaluation</mark></h2><h3 id="91c087c6-851f-4af2-8f81-86abfdc5f0e8" class=""><mark class="highlight-blue">7.1. Error of each model</mark></h3><table id="a1e5d5cf-634c-4390-8a03-7666cc32b5d1" class="simple-table"><tbody><tr id="a4c8101d-d551-455a-b1bf-0d063457edf5"><td id="}dzm" class=""><strong>Model Name</strong></td><td id="BGhB" class=""><strong>MAE CV</strong></td><td id="wop=" class=""><strong>MAPE CV</strong></td><td id="a{;g" class=""><strong>RMSE CV</strong></td></tr><tr id="308b1171-2402-4378-af41-eef15d69f3c3"><td id="}dzm" class="">Additive</td><td id="BGhB" class="">2522846.55 +/- 817470.8</td><td id="wop=" class="">0.05 +/- 0.02</td><td id="a{;g" class="">2865269.05 +/- 796863.25</td></tr><tr id="fd6d879f-174d-4da0-b3c5-86d8cb70fd62"><td id="}dzm" class="">Multiplicative</td><td id="BGhB" class="">1389641.5 +/- 497090.78</td><td id="wop=" class="">0.03 +/- 0.01</td><td id="a{;g" class="">0.03 +/- 0.01</td></tr></tbody></table><p id="ed8b9f8d-30ee-4f30-b4bb-2437005411f9" class=""><mark class="highlight-yellow">MAE Distribution &amp; KDE</mark></p><div id="bdfce7c2-39c2-4ce2-be40-066176a52c21" class="column-list"><div id="b495dc84-e02b-4aa0-b132-d41d9dca6303" style="width:50%" class="column"><p id="646cf436-07b6-43ff-9bbc-f1e922a9e2b5" class="">Additive Model </p><figure id="9d09f14e-59a5-4a7c-b2dc-ea831c84f1d8" class="image"><a href="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%2016.png"><img style="width:788px" src="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%2016.png"/></a></figure></div><div id="c4d4d352-3e28-4ad9-a70d-3193613703b7" style="width:50%" class="column"><p id="7b02672a-2729-4b0c-90e2-fe5a2f72082b" class="">Multiplicative Model </p><figure id="9ede4504-3039-40d9-9700-af6769f26f21" class="image"><a href="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%2017.png"><img style="width:806px" src="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%2017.png"/></a></figure></div></div><h3 id="54830538-3ab8-403e-8d1d-280763565b9b" class=""><mark class="highlight-blue">7.2. Hypothesis test to define the model</mark></h3><p id="df349d31-3020-4dae-9d4c-20bcf4abac62" class="">Considering the forecast error resulting from each model, did the Multiplicative and Additive Seasonal Models have significantly different Mean Average Errors?</p><p id="5a2a095b-b3ee-4c75-857d-801133c44d75" class="">Defining the null hypothesis as <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>H</mi><mn>0</mn></msub><mo>:</mo><msub><mi>μ</mi><mrow><mi>M</mi><mi>u</mi><mi>l</mi></mrow></msub><mo>−</mo><msub><mi>μ</mi><mrow><mi>A</mi><mi>d</mi><mi>d</mi></mrow></msub><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">H_0: \mu_{Mul} - \mu_{Add} = 0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.08125em;">H</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.08125em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">:</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.7777700000000001em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathnormal">μ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.10903em;">M</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathnormal">μ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">A</span><span class="mord mathnormal mtight">dd</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">0</span></span></span></span></span><span>﻿</span></span>, and the alternative hypothesis as<style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>H</mi><mi>A</mi></msub><mo>:</mo><msub><mi>μ</mi><mrow><mi>M</mi><mi>u</mi><mi>l</mi></mrow></msub><mo>&lt;</mo><msub><mi>μ</mi><mrow><mi>A</mi><mi>d</mi><mi>d</mi></mrow></msub></mrow><annotation encoding="application/x-tex">H_A: \mu_{Mul} &lt; \mu_{Add}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.08125em;">H</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.32833099999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.08125em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">A</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">:</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.7335400000000001em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathnormal">μ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.10903em;">M</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathnormal">μ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">A</span><span class="mord mathnormal mtight">dd</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span><span>﻿</span></span> , with a significance level of <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi><mo>=</mo><mn>0.05</mn></mrow><annotation encoding="application/x-tex">\alpha=0.05</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.0037em;">α</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">0.05</span></span></span></span></span><span>﻿</span></span>.</p><p id="7de55a80-6f93-431b-9d22-44db8fa12ba1" class="">By the fact that the model presents different variances, the <mark class="highlight-yellow">Welch test</mark> is used to evaluate the null hypothesis. </p><table id="ce9f7405-f3ab-4e71-bfb6-6662a7a92544" class="simple-table"><tbody><tr id="510b92e2-73c8-41e2-b091-024c66cb19a9"><td id="q]^=" class=""><strong>T</strong></td><td id="IIzV" class=""><strong>dof</strong></td><td id="QqpC" class=""><strong>alternative</strong></td><td id="RT~I" class=""><strong>p-val</strong></td><td id="dvTd" class=""><strong>CI95%</strong></td></tr><tr id="bec1afdd-86aa-46ee-b68e-ec7fd51999d2"><td id="q]^=" class="">6.487445</td><td id="IIzV" class="">49.517404</td><td id="QqpC" class="">two-sided</td><td id="RT~I" class="">3.956722e-08</td><td id="dvTd" class="">[-1484138.12, -782271.97]</td></tr></tbody></table><div id="52316b4f-7a29-4775-9ba2-5637537cc13f" class="column-list"><div id="36871354-be40-4c8b-b81d-2da76f0fc40d" style="width:50%" class="column"><ul id="2386558e-4832-46cd-8eb0-064353beb9cb" class="bulleted-list"><li style="list-style-type:disc">Best Estimate </li></ul><p id="776e5b99-f391-4e36-8471-11ac526cc7d8" class=""><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover accent="true"><mi>x</mi><mo>ˉ</mo></mover><mrow><mi>m</mi><mi>u</mi><mi>l</mi></mrow></msub><mo>−</mo><msub><mover accent="true"><mi>x</mi><mo>ˉ</mo></mover><mrow><mi>a</mi><mi>d</mi><mi>d</mi></mrow></msub><mo>=</mo><mo>−</mo><mn>1</mn><mo separator="true">,</mo><mn>133</mn><mo separator="true">,</mo><mn>205.0</mn></mrow><annotation encoding="application/x-tex">\bar{x}_{mul}-\bar{x}_{add}= -1,133,205.0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.73333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.56778em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">x</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.22222em;"><span class="mord">ˉ</span></span></span></span></span></span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">m</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.71778em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.56778em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">x</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.22222em;"><span class="mord">ˉ</span></span></span></span></span></span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">dd</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.8388800000000001em;vertical-align:-0.19444em;"></span><span class="mord">−</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">133</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">205.0</span></span></span></span></span><span>﻿</span></span></p><ul id="a10705ce-924b-4b43-9886-a041bc95ae3b" class="bulleted-list"><li style="list-style-type:disc"><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>p</mi><mrow><mi>v</mi><mi>a</mi><mi>l</mi></mrow></msub><mo>&lt;</mo><mi>α</mi></mrow><annotation encoding="application/x-tex">p_{val} &lt; \alpha</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7335400000000001em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathnormal">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">v</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.0037em;">α</span></span></span></span></span><span>﻿</span></span> </li></ul><p id="9a841c57-bc68-4d19-be2c-7a3f7dd40173" class="">Formally, based on our sample and our p-value, we <mark class="highlight-yellow">reject the null hypothesis</mark>. We conclude that the mean difference of MAE for <em>add</em> model and <em>nul</em> model is significantly different from 0.</p><p id="ec589c20-08f2-41b2-8306-7db8727f1cb1" class="">Based on the confidence interval calculated, it is possible to assume that <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover accent="true"><mi>x</mi><mo>ˉ</mo></mover><mrow><mi>m</mi><mi>u</mi><mi>l</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\bar{x}_{mul}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.71778em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.56778em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">x</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.22222em;"><span class="mord">ˉ</span></span></span></span></span></span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">m</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span><span>﻿</span></span> is lower than <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover accent="true"><mi>x</mi><mo>ˉ</mo></mover><mrow><mi>a</mi><mi>d</mi><mi>d</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\bar{x}_{add}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.71778em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.56778em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">x</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.22222em;"><span class="mord">ˉ</span></span></span></span></span></span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">dd</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span><span>﻿</span></span> since our range of reasonable values for the mean difference is negative. </p><figure id="8c0ac65c-34d6-4c64-b455-da938531eafa" class="image"><a href="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%2018.png"><img style="width:763px" src="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%2018.png"/></a></figure></div><div id="c7b10135-0b01-431a-bde1-170b63bee28e" style="width:50%" class="column"><p id="46cb62c5-42b4-4adf-9d6f-436b2705db92" class="">
+</p><p id="b0a5b2d3-7785-452c-80f6-6239af5bbbb5" class=""><mark class="highlight-yellow">Model MAE Comparison</mark></p><figure id="c160819b-ac1f-4fee-b510-fa41c8ed647a" class="image"><a href="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%2019.png"><img style="width:809px" src="The%20Holt-Winter%20Forecasting%20Procedure%20on%20Walmart%20S%207cd32592ebc34421b89e7b2941b0e001/Untitled%2019.png"/></a></figure><p id="88184dc9-ae00-4e6c-8f79-c88cb4331f3c" class="">
+</p><p id="25e17ec1-4846-4f02-a453-067e1d58d7e4" class="">So, the Multiplicative Seasonal Model performed better to forecast the current dataset.</p><p id="7d800e77-c0be-4192-b828-6bbcaf7e0d44" class="">The chart on the left plot the expanding window predictions for nine weeks’ forecast.</p><p id="723de826-3ac5-4300-abaf-caa3c783dcef" class="">
+</p></div></div><h2 id="d0b014d9-47e8-4528-8e83-edcdf3c54622" class="block-color-yellow_background"><mark class="highlight-blue">8. References</mark></h2><p id="a2f3d809-d001-4d8e-a367-a635e7e996cc" class="">SHEARER, Colin. The CRISP-DM model: the new blueprint for data mining. <strong>Journal of data warehousing</strong>, v. 5, n. 4, p. 13-22, 2000.</p><p id="4364ae83-29cf-4f41-87f6-a7d3607df72e" class="">KALEKAR, Prajakta S. et al. Time series forecasting using holt-winters exponential smoothing. <strong>Kanwal Rekhi school of information Technology</strong>, v. 4329008, n. 13, p. 1-13, 2004.</p><p id="c7edd811-682b-4eed-9f87-38e4329d2edc" class="">CHATFIELD, Chris; YAR, Mohammad. Holt‐Winters forecasting: some practical issues. <strong>Journal of the Royal Statistical Society: Series D (The Statistician)</strong>, v. 37, n. 2, p. 129-140, 1988.</p><p id="a7196585-509b-4c1b-9888-eddb55aec125" class="">CHATFIELD, Chris. The Holt‐winters forecasting procedure. <strong>Journal of the Royal Statistical Society: Series C (Applied Statistics)</strong>, v. 27, n. 3, p. 264-279, 1978.APA</p><p id="2699063c-e0a2-4afb-981b-4d209925d825" class="">TRATAR, Liljana Ferbar; STRMČNIK, Ervin. The comparison of Holt–Winters method and Multiple regression method: A case study. <strong>Energy</strong>, v. 109, p. 266-276, 2016.</p><p id="873fbbfe-4fc7-415b-b525-9ef9edf830e2" class="">Data Source from Kaggle API: kaggle competitions download -c walmart-recruiting-store-sales-forecasting</p><h2 id="ccce3485-7333-4446-9dec-e27dc4941cf5" class="block-color-yellow_background"><mark class="highlight-blue">9. Appendix - Python Class</mark></h2><figure id="727f941c-cf2b-4de7-97b7-65484d509225"><div class="source">https://github.com/bpuppim/Walmart_HoltWinter</div></figure><p id="8a97d0e7-d1bd-474f-83c0-379eb139a885" class="">
+</p></div></article></body></html>
